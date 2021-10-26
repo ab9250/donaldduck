@@ -1,0 +1,95 @@
+defaultHttp: &defaultHttpSettings
+  cors: ${self:custom.cors.${self:custom.stage}, self:custom.cors.dev}
+  authorizer: ${file(../../serverless.common.yml):authorizer}
+service:
+  name: mypgs-training-2-blah
+  awsKmsKeyArn: ${ssm:account_lambda_kms_arn}
+custom: ${file(../../serverless.common.yml):custom}
+provider:
+  name: aws
+  runtime: python3.7
+  stage: ${self:custom.stage}
+  apiGateway:
+    restApiId: ${ssm:${self:custom.service_base}-${self:custom.stage}-rest-api-id}
+    restApiRootResourceId: ${ssm:${self:custom.service_base}-${self:custom.stage}-rest-api-root-resource-id}
+  timeout: 30
+  region: us-east-1
+  tracing: ${file(../../serverless.common.yml):tracing}
+  environment:
+    FUNCTION_SHIELD_TOKEN: ${ssm:account_function_shield_token}
+    ORIGIN: ${self:custom.origin.${self:custom.stage}, self:custom.origin.dev}
+    tableName: mypgs-training-2-user
+    API_KEY: ${ssm:${self:custom.service_base}-${self:custom.stage}-weather-api-secret-arn}
+  deploymentBucket:
+    name: ${ssm:account_code_bucket_name}
+    serverSideEncryption: AES256
+  stackTags: ${file(../../serverless.common.yml):defaultTags}
+  tags: ${file(../../serverless.common.yml):defaultTags}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTraceSegments
+        - xray:PutTelemetryRecords
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - kms:Decrypt
+      Resource:
+        - ${ssm:account_lambda_kms_arn}
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem 
+      Resource: arn:aws:dynamodb:us-east-1:274857843337:table/mypgs-training-2-user
+    - Effect: Allow
+      Action:
+        - "secretsmanager:GetSecretValue"
+      Resource: 
+        - ${ssm:${self:custom.service_base}-${self:custom.stage}-weather-api-secret-arn}
+package:
+  excludeDevDependencies: True
+  exclude:
+    - package.json
+    - package-lock.json
+    - node_modules/**
+    - tests/**
+  include:
+    - ../../services/shared/**
+    - ../../services/__init__.py
+functions:
+  user:
+    handler: user.lambda_handler
+    description:
+    # environment:
+    #   tableName: ${self:service}-${self:custom.stage}-selections
+    events:
+      - http:
+          path: /user
+          method: get
+          <<: *defaultHttpSettings
+  calculator:
+    handler: soapCalculator.lambda_handler
+    events:
+      - http:
+          path: /calculator
+          method: post
+          <<: *defaultHttpSettings
+  weather:
+    handler: weather.lambda_handler
+    events:
+      - http:
+          path: /weather
+          method: get
+          <<: *defaultHttpSettings
+  addLocation:
+    handler: saveWeather.lambda_handler
+    events:
+      - http:
+          path: /saveLocation
+          method: post
+          <<: *defaultHttpSettings
+
+plugins:
+  - serverless-python-requirements

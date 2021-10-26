@@ -1,0 +1,15 @@
+#error{
+    color:rgb(255, 255, 255) !important;
+}
+
+#feedbackOverInput{
+    color:rgb(58, 58, 58)!important;
+}
+
+#acceptingreach{
+    color:rgb(58, 58, 58) !important;
+}
+
+#feedbackInput::placeholder{
+    color:grey !important;
+}
