@@ -1,0 +1,77 @@
+.whiteText{
+  color: white;
+}
+  .input{
+    color: white !important;
+    border-color: white !important;
+  }
+
+.close{
+    color: white !important;
+}
+
+  .css-1rhbuit-multiValue {
+    background-color: #333 !important;
+  }
+  
+  .css-yk16xz-control {
+    border-color: #111 !important;
+    color: white;
+  }
+  
+  .css-1n7v3ny-option {
+    background-color: #333 !important;
+  }
+  
+  .css-1n7v3ny-option:hover {
+    background-color: #444 !important;
+  }
+  
+  .css-g1d714-ValueContainer {
+    color: white !important;
+  }
+  
+  div[class^="css-"] {
+    color: white !important;
+  }
+  
+  .css-1uccc91-singleValue {
+    color: white !important;
+  }
+  
+  .react-bootstrap-table table {
+    background-color: #1a1d21;
+  }
+
+  .form-control{
+    border-color: white !important;
+  }
+
+.custom-modal {
+  background-color: #272b30 !important;
+}
+
+.modal-content{
+  border-color: #111 !important;
+  background-color: #333 !important;
+}
+
+.text-muted{
+  color: white !important;
+}
+
+.css-bg1rzq-control div {
+color: white !important;
+}
+
+.css-ssi0ig-container div{
+color: rgb(158, 158, 158) !important;
+border-color: grey !important;
+background-color: rgb(59, 59, 59) !important;
+}
+
+input:disabled{
+  color: rgb(158, 158, 158) !important;
+  border-color: grey !important;
+  background-color: rgb(59, 59, 59) !important;
+}

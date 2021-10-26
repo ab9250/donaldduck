@@ -1,0 +1,3 @@
+function-shield
+aws-xray-sdk
+zeep

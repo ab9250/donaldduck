@@ -1,0 +1,103 @@
+defaultTags:
+  Application_Name: "TODO"
+  Cost_Center: "1000556407"
+  Application_ID: "BLAHBLAHBLAHBLAH"
+  Original_Requestor: "bray.sd@pg.com"
+  Owning_Role: "CNF-DCT-NonProd-Developer-Test1"
+  Managing_Group: "CNF-DCT-NonProd-Developer-Test1"
+custom:
+#Added python requirements
+  pythonRequirements:
+    dockerizePip: true
+  stage: ${opt:stage, env:TF_WORKSPACE}
+  service_base: "donaldduck"
+  authorizer:
+    dev:
+      name: pingAuthFunction
+      resultTtlInSeconds: 300
+      identitySource: method.request.header.Cookie, context.identity.sourceIp
+      type: request
+    non-prod:
+      name: pingAuthFunction
+      resultTtlInSeconds: 300
+      identitySource: method.request.header.Cookie, context.identity.sourceIp
+      type: request
+    local:
+      name: pingAuthFunction
+      resultTtlInSeconds: 300
+      type: TOKEN
+  associateWaf:
+    name: ${ssm:account_regional_waf_name}
+  stageDomain:
+    dev:
+      domainName: api.dct-training-2.hr.pg.com
+      stage: ${self:custom.stage}
+      basePath: ${self:custom.stage}
+      certificateArn: ${ssm:${self:custom.service_base}-${self:custom.stage}-acm-arn}
+      createRoute53Record: true
+    non-prod:
+      domainName: api.dct-training-2-np.hr.pg.com
+      stage: ${self:custom.stage}
+      basePath: ${self:custom.stage}
+      certificateArn: ${ssm:${self:custom.service_base}-${self:custom.stage}-acm-arn}
+      createRoute53Record: true
+    local:
+      domainName: api.dct-training-2-np.hr.pg.com
+      enabled: false
+  customDomain: ${self:custom.stageDomain.${self:custom.stage}, self:custom.stageDomain.dev}
+  origin:
+    dev: "https://dct-training-2.hr.pg.com"
+    non-prod: "https://dct-training-2-np.hr.pg.com"
+    local: "http://localhost:3000"
+  cookieAuth:
+    dev: true
+    non-prod: true
+    local: false
+  cors:
+    dev:
+      origins:
+        - https://dct-training-2.hr.pg.com
+      allowCredentials: true
+    non-prod:
+      origins:
+        - https://dct-training-2-np.hr.pg.com
+      allowCredentials: true
+    local:
+      origins:
+        - http://localhost:3000
+      allowCredentials: true
+  # vpc-id:
+  #   dev: vpc-ea87c98c
+  #   non-prod: vpc-ea87c98c
+  #   iam-reporting: vpc-ea87c98c
+  #   prod: vpc-8daae4eb
+  # subnet-1:
+  #   dev: subnet-0fc6bcf1909125b68
+  #   non-prod: subnet-0fc6bcf1909125b68
+  #   iam-reporting: subnet-0fc6bcf1909125b68
+  #   prod: subnet-0363c87e1f7d5313d
+  # subnet-2:
+  #   dev: subnet-0fc6bcf1909125b68
+  #   non-prod: subnet-0fc6bcf1909125b68
+  #   iam-reporting: subnet-0fc6bcf1909125b68
+  #   prod: subnet-04a8ec69dcf621457
+  ResponseParameters:
+    dev:
+      gatewayresponse.header.Access-Control-Allow-Origin: "'https://dct-training-2.hr.pg.com'"
+      gatewayresponse.header.Access-Control-Allow-Headers: "'https://dct-training-2.hr.pg.com'"
+      gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+    non-prod:
+      gatewayresponse.header.Access-Control-Allow-Origin: "'https://dct-training-2-np.hr.pg.com'"
+      gatewayresponse.header.Access-Control-Allow-Headers: "'https://dct-training-2-np.hr.pg.com'"
+      gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+    local:
+      gatewayresponse.header.Access-Control-Allow-Origin: "'http://localhost:3000'"
+      gatewayresponse.header.Access-Control-Allow-Headers: "'http://localhost:3000'"
+      gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+tracing:
+  apiGateway: true
+  lambda: true
+authorizer:
+  authorizerId: ${ssm:${self:custom.service_base}-${self:custom.stage}-authorizer-id}
+  resultTtlInSeconds: 300
+  type: CUSTOM

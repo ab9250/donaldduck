@@ -1,0 +1,80 @@
+service:
+  name: mypgs-training-2-api
+  awsKmsKeyArn: ${ssm:account_lambda_kms_arn}
+custom: ${file(../../serverless.common.yml):custom}
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 512
+  stage: ${self:custom.stage}
+  timeout: 30
+  region: us-east-1
+  tracing: ${file(../../serverless.common.yml):tracing}
+  deploymentBucket:
+    name: ${ssm:account_code_bucket_name}
+    serverSideEncryption: AES256
+  stackTags: ${file(../../serverless.common.yml):defaultTags}
+  tags: ${file(../../serverless.common.yml):defaultTags}
+package:
+  excludeDevDependencies: True
+functions:
+  helloWorld:
+    handler: hello.lambda_handler
+    description:
+    events:
+      - http:
+          path: /
+          method: get
+          authorizer: ${self:custom.authorizer.${self:custom.stage}, self:custom.authorizer.dev}
+  pingAuthFunction:
+    handler: auth.lambda_handler
+    environment:
+      PingClientID: AWSServerlessTest
+      Domain: ${ssm:account_ping_instance}
+      COOKIE_AUTH: ${self:custom.cookieAuth.${self:custom.stage}, self:custom.cookieAuth.dev}
+plugins:
+  - serverless-python-requirements
+  - serverless-associate-waf
+  - serverless-domain-manager
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters: ${self:custom.ResponseParameters.${self:custom.stage}, self:custom.ResponseParameters.dev}
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+    GatewayResponseDefault5XX:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters: ${self:custom.ResponseParameters.${self:custom.stage}, self:custom.ResponseParameters.dev}
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+    ApiGatewayRestApiId:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: ${self:custom.service_base}-${self:custom.stage}-rest-api-id
+        Type: String
+        Value:
+          Ref: ApiGatewayRestApi
+    ApiGatewayRestApiRootResourceId:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: ${self:custom.service_base}-${self:custom.stage}-rest-api-root-resource-id
+        Type: String
+        Value:
+          Fn::GetAtt:
+            - ApiGatewayRestApi
+            - RootResourceId
+    AuthFunctionId:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: ${self:custom.service_base}-${self:custom.stage}-authorizer-id
+        Type: String
+        Value:
+          Ref: PingAuthFunctionApiGatewayAuthorizer
+
+  
+

@@ -1,0 +1,6 @@
+pytest
+pytest-mock
+moto
+pytest-cov
+function-shield
+black
