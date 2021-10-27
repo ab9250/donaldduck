@@ -59,15 +59,13 @@ resource "aws_route53_record" "ns_shared_dev_donald_duck" {
 #### Step two:
 ## Deploying
 
-to change a file name mv .git .gitback
-
-cp -r * ../donaldduck this copies everyting in the current directly the .. says go back one directory to donald duck and copy it there.
-
 #### Step one: Deploying Terraform Components
 
 Update Main.tf  repleace donaldduck with the dns that you created in the above steps.
 
+to change a file name mv .git .gitback
 
+cp -r * ../donaldduck this copies everyting in the current directly the .. says go back one directory to donald duck and copy it there.
 
 terraform {
   backend "s3" {
@@ -112,26 +110,14 @@ git config - will show alot of options
 ```bash
 cd stack/terraform
 # change the s3 bucket name in main.tf to match your terraform state bucket in the account. Unfortunately terraform does not allow you to use variables in the backend declaration.
-
---If you do not have terraform installed you will be promed, to install type tfenv installls, whe installing any software you need to do that in a terminal not VS studio Termina
-
-terraform workspace new <workspace name> --this creates the workspace and by creating a new one it is selected
-     DELETE THIS LINE export TF_WORKSPACE=<workspace name>
-if you need switch a workspace stype select TF_WORKSPACE=<workspace name>
-terraform init - this will download the plugins/modules to talk with the could and sets up the terraform state file.
-
+terraform workspace new <workspace name>
+export TF_WORKSPACE=<workspace name>
+terraform init
 terraform plan
 terraform apply
 ```
-delete 
-.terraform
-terraform.tfstate.d
-
-after you delete then go into terrafrom directory and run terraform init   
 
 This will take a fair amount of time approximately 6 minutes because of cloudfront distribution, also take note of the output from terraform apply you will use that later in deploying the frontend.
-
-rm -r <directoryName> deletes the directory and the files in it.
 
 **Known Issues**
 
